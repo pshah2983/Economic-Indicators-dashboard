@@ -1,0 +1,6 @@
+Folder PATH listing
+Volume serial number is B6F9-D1B7
+C:\USERS\DELL\DESKTOP\DS PROJECTS\STOCK MARKET ANALYSIS\-A
+Invalid path - \USERS\DELL\DESKTOP\DS PROJECTS\STOCK MARKET ANALYSIS\-A
+No subfolders exist 
+
