@@ -1,11 +1,52 @@
+import streamlit as st
 import pandas as pd
-import wbgapi as wb
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import dash
-from dash import html, dcc, Input, Output, State
-import dash_bootstrap_components as dbc
+import wbgapi as wb
+import pathlib
+import base64
 
+# Set page config
+st.set_page_config(
+    page_title="Economic Indicators Dashboard",
+    page_icon="📈",
+    layout="wide"
+)
+
+# Load external CSS
+def load_css():
+    css_file = pathlib.Path(__file__).parent.parent / 'static' / 'streamlit_style.css'
+    with open(css_file) as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+# Load CSS
+load_css()
+
+# Add background image
+def add_bg_from_local(image_file):
+    with open(image_file, "rb") as file:
+        encoded_string = base64.b64encode(file.read())
+    st.markdown(
+    f"""
+    <style>
+    .stApp > header + div {{
+        background-image: url(data:image/webp;base64,{encoded_string.decode()});
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+    )
+
+# Load background image
+bg_image = pathlib.Path(__file__).parent.parent / 'static' / 'background_image.webp'
+if bg_image.exists():
+    add_bg_from_local(str(bg_image))
+
+@st.cache_data
 def get_country_list():
     """Get list of all available countries from World Bank API"""
     countries = {}
@@ -19,156 +60,83 @@ def create_visualization(selected_countries):
     if not selected_countries:
         return go.Figure()
         
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-    
     indicators = {
         'NY.GDP.MKTP.CD': 'GDP (current US$)',
         'FP.CPI.TOTL.ZG': 'Inflation Rate (%)',
         'SL.UEM.TOTL.ZS': 'Unemployment Rate (%)'
     }
     
-    all_data = {}
-    for indicator_code, indicator_name in indicators.items():
-        df = wb.data.DataFrame(indicator_code, selected_countries, mrv=20)
-        all_data[indicator_code] = df
+    # Create tabs for different indicators
+    tabs = st.tabs(list(indicators.values()))
     
-    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
-    
-    for i, (indicator_code, indicator_name) in enumerate(indicators.items()):
-        df = all_data[indicator_code]
-        years = [year[2:] for year in df.columns]
-        
-        for j, country in enumerate(df.index):
-            values = df.loc[country].values
-            color = colors[j % len(colors)]
-            
-            fig.add_trace(
-                go.Scatter(
-                    x=years,
-                    y=values,
-                    name=f"{country} - {indicator_name}",
-                    mode='lines+markers',
-                    visible=(i == 0),
-                    line=dict(color=color, width=2),
-                    marker=dict(size=8)
+    for tab, (indicator_code, indicator_name) in zip(tabs, indicators.items()):
+        with tab:
+            with st.spinner(f'Loading {indicator_name} data...'):
+                df = wb.data.DataFrame(indicator_code, selected_countries, mrv=20)
+                
+                fig = go.Figure()
+                for country in df.index:
+                    fig.add_trace(
+                        go.Scatter(
+                            x=df.columns,
+                            y=df.loc[country].values,
+                            name=country,
+                            mode='lines+markers'
+                        )
+                    )
+                    
+                fig.update_layout(
+                    title=f"{indicator_name} by Country",
+                    xaxis_title="Year",
+                    yaxis_title="Value",
+                    height=500,
+                    template='plotly_dark',
+                    hovermode='x unified',
+                    margin=dict(t=50, l=50, r=50, b=50),
+                    paper_bgcolor='rgba(26, 26, 26, 0.7)',
+                    plot_bgcolor='rgba(26, 26, 26, 0.7)',
+                    font=dict(color='#a8a8a8'),
+                    xaxis=dict(gridcolor='rgba(168, 168, 168, 0.1)'),
+                    yaxis=dict(gridcolor='rgba(168, 168, 168, 0.1)'),
+                    legend=dict(
+                        font=dict(size=14),
+                        bgcolor='rgba(26, 26, 26, 0.7)',
+                        bordercolor='rgba(168, 168, 168, 0.3)'
+                    )
                 )
-            )
-    
-    fig.update_layout(
-        title={
-            'text': 'Economic Indicators Dashboard',
-            'y': 0.95,
-            'x': 0.5,
-            'xanchor': 'center',
-            'yanchor': 'top'
-        },
-        xaxis_title="Year",
-        yaxis_title="Value",
-        hovermode='x unified',
-        template='plotly_white',
-        height=600,
-        showlegend=True,
-        legend=dict(
-            yanchor="top",
-            y=0.99,
-            xanchor="right",
-            x=0.99
-        ),
-        updatemenus=[{
-            'buttons': [
-                dict(
-                    args=[{"visible": [j//len(df.index) == i for j in range(len(df.index)*len(indicators))]}],
-                    label=name,
-                    method="update"
-                ) for i, (_, name) in enumerate(indicators.items())
-            ],
-            'direction': 'down',
-            'showactive': True,
-            'x': 0.1,
-            'y': 1.15,
-            'xanchor': 'left',
-            'yanchor': 'top'
-        }]
-    )
-    
-    return fig
+                
+                st.plotly_chart(fig, use_container_width=True)
 
 def main():
-    app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+    st.title("Economic Indicators Dashboard")
     
-    countries = get_country_list()
-    country_options = [{'label': name, 'value': code} for code, name in sorted(countries.items(), key=lambda x: x[1])]
-    
-    app.layout = html.Div([
-        # Header
-        html.H1("Economic Indicators Dashboard", 
-                style={'textAlign': 'center', 'margin': '20px 0'}),
+    # Sidebar
+    with st.sidebar:
+        st.markdown("### Country Selection")
+        countries = get_country_list()
+        selected_countries = st.multiselect(
+            "Select countries to compare",
+            options=list(countries.keys()),
+            default=['USA', 'CHN', 'IND'],
+            format_func=lambda x: countries[x]
+        )
         
-        # Main content
-        html.Div([
-            # Left panel with controls
-            html.Div([
-                html.H3("Select Countries"),
-                dcc.Dropdown(
-                    id='country-selector',
-                    options=country_options,
-                    value=['USA', 'CHN', 'IND'],
-                    multi=True,
-                    placeholder="Select countries to compare..."
-                ),
-                html.Button('Update Dashboard', 
-                           id='update-button', 
-                           n_clicks=0,
-                           style={
-                               'marginTop': '20px',
-                               'padding': '10px',
-                               'width': '100%',
-                               'backgroundColor': '#007bff',
-                               'color': 'white',
-                               'border': 'none',
-                               'borderRadius': '5px'
-                           })
-            ], style={
-                'width': '300px',
-                'padding': '20px',
-                'backgroundColor': '#f8f9fa',
-                'borderRadius': '10px',
-                'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'
-            }),
-            
-            # Right panel with graph
-            html.Div([
-                dcc.Loading(
-                    id="loading",
-                    type="default",
-                    children=[dcc.Graph(id='main-graph')]
-                )
-            ], style={
-                'flex': '1',
-                'marginLeft': '20px',
-                'padding': '20px',
-                'backgroundColor': '#f8f9fa',
-                'borderRadius': '10px',
-                'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'
-            })
-        ], style={
-            'display': 'flex',
-            'margin': '20px',
-            'gap': '20px'
-        })
-    ])
+        st.markdown("""
+        ### About This Dashboard
+        This interactive dashboard visualizes key economic indicators across different countries:
+        - GDP (current US$)
+        - Inflation Rate (%)
+        - Unemployment Rate (%)
+        
+        Select multiple countries from the list to compare their economic indicators.
+        Use the tabs above the chart to switch between different indicators.
+        """)
     
-    @app.callback(
-        Output('main-graph', 'figure'),
-        Input('update-button', 'n_clicks'),
-        State('country-selector', 'value')
-    )
-    def update_graph(n_clicks, selected_countries):
-        if not selected_countries:
-            return go.Figure()
-        return create_visualization(selected_countries)
-    
-    app.run(debug=True)
+    # Main content
+    if not selected_countries:
+        st.warning("Please select at least one country from the sidebar.")
+    else:
+        create_visualization(selected_countries)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main() 

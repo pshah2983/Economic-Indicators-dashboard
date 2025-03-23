@@ -1,0 +1,207 @@
+/* Main container */
+.stApp {
+    max-width: 100%;
+    background-color: #1a1a1a;
+}
+
+/* Main content area */
+.main {
+    padding: 2rem;
+    position: relative;
+}
+
+/* Background container */
+.stApp > header + div {
+    background-image: url('../static/background_image.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* Content overlay */
+.main > div:first-child {
+    background-color: rgba(26, 26, 26, 0.85);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+}
+
+/* Sidebar styling */
+.css-1d391kg {  /* Streamlit sidebar class */
+    background-color: rgba(26, 26, 26, 0.95);
+    padding: 2rem 1rem;
+    border-right: 1px solid #2d2d2d;
+}
+
+/* Headers */
+h1 {
+    color: #3498db;
+    font-size: 2.5rem !important;
+    font-weight: 600 !important;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #2d2d2d;
+    margin-bottom: 2rem;
+}
+
+h3 {
+    color: #3498db;
+    font-size: 1.5rem !important;
+    font-weight: 500 !important;
+    margin-bottom: 1rem;
+}
+
+/* Multiselect and Selectbox styling */
+.stSelectbox, .stMultiSelect {
+    background-color: rgba(45, 45, 45, 0.9);
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.stSelectbox > div, .stMultiSelect > div {
+    background-color: rgba(45, 45, 45, 0.9);
+}
+
+/* Tabs styling */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 2rem;
+    background-color: transparent;
+}
+
+.stTabs [data-baseweb="tab"] {
+    height: 50px;
+    padding: 0 16px;
+    background-color: transparent;
+    border-radius: 4px 4px 0 0;
+    color: #a8a8a8;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    color: #3498db;
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.stTabs [aria-selected="true"] {
+    color: #3498db !important;
+    border-bottom: 2px solid #3498db !important;
+}
+
+/* Plot container */
+.js-plotly-plot {
+    border-radius: 8px;
+    background-color: rgba(26, 26, 26, 0.7) !important;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    backdrop-filter: blur(8px);
+}
+
+/* Warning message */
+.stAlert {
+    background-color: rgba(45, 45, 45, 0.9);
+    color: #ffd700;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ffd700;
+}
+
+/* Spinner */
+.stSpinner > div {
+    border-color: #3498db !important;
+}
+
+/* Markdown text */
+.sidebar .stMarkdown {
+    padding: 1rem 0;
+}
+
+.sidebar .stMarkdown p {
+    color: #a8a8a8;
+    line-height: 1.6;
+}
+
+.sidebar .stMarkdown ul {
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.sidebar .stMarkdown li {
+    margin: 0.5rem 0;
+    color: #a8a8a8;
+}
+
+/* Text colors */
+.stMarkdown, .stText {
+    color: #a8a8a8 !important;
+}
+
+/* Plot text colors */
+.js-plotly-plot text {
+    fill: #a8a8a8 !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #2d2d2d;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3498db;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #2980b9;
+}
+
+/* Additional dark theme elements */
+.element-container, .stTextInput > div > div > input {
+    color: #a8a8a8 !important;
+    background-color: rgba(45, 45, 45, 0.9) !important;
+}
+
+/* Plotly modebar */
+.modebar {
+    background-color: rgba(26, 26, 26, 0.7) !important;
+}
+
+.modebar-btn path {
+    fill: #a8a8a8 !important;
+}
+
+/* Select dropdown options */
+.stSelectbox option, .stMultiSelect option {
+    background-color: #2d2d2d;
+    color: #a8a8a8;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+    .main {
+        padding: 1rem;
+    }
+    
+    h1 {
+        font-size: 2rem !important;
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 1rem;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        height: 40px;
+        padding: 0 12px;
+    }
+} 
